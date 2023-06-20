@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- Popper JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+        <title>Log-in Page</title>
+
+        <script>
+            function loginFunc()
+            {
+                const email=document.getElementById('email');
+                const password=document.getElementById('password');
+
+                let validMail= /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+                if(!email.value.match(validMail))
+                    alert("Invalid mail, please try again.");
+                
+                else{
+                    let validPass=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\\|[\]{};:/?.,><])[A-Za-z\d!@#$%^&*()\-_=+\\|[\]{};:/?.,><]{6,}$/;
+                    if(!password.value.match(validPass))
+                        alert("Password must include:\n Minimum 6 Characters\n "
+                        ,"Uppercase Character\n Lowercase Character\n a Number\n a Special Character",
+                        "\n Supported special characters are: ! @ # $ % ^ & * ( ) - _ = + \ | [ ] { } ; : / ? . > <");
+
+                    else{
+                        var data = {
+                                    email: email.value,
+                                    password: password.value
+                                    };
+                                    // Send the Ajax request
+                                    $.ajax({
+                                        url: '/login',
+                                        type: 'POST',
+                                        data: data,
+                                        success: function(response) {
+                                            if (response.redirect) {
+                                               window.location.href = response.redirect;
+                                            }
+                                        },
+                                        error: function(xhr, status, error) {
+                                            if(xhr.status==400)
+                                                alert('User does not exist in the system');
+                                            console.error(error);
+                                        }
+                                    });
+                                }
+                    }
+            }
+            
+        </script>
+
+       <style>
+            body{
+                background-image:url('background.jpg');
+                background-repeat: no-repeat;
+                padding-top: 80px;
+                text-align: center;
+                justify-content: center;
+                align-items: center;
+            }
+
+            #square{
+                background-color: white;
+                width: 400px;
+                height: 400px;
+                border-radius: 30px;
+            }
+
+
+            #head2{
+                font-family:'Calibri light';
+                font-size: 30px;
+                font-weight: bold;
+                padding-top: 30px;
+                margin-bottom: 30px;
+            }
+
+            #butt{
+                color: white;
+                width: 6cm;
+                height: 30px;
+                background-color:#c3195d;
+                border-radius: 10px;
+                border-color: #c3195d;
+            }
+
+            .text {
+                font-size: 13px;
+                font-family:'Calibri light';
+                display: inline-block;
+            }
+
+            .text2 {
+                font-size: 13px;
+                font-family:'Calibri light';
+                align-self: right;
+                padding-top: 300px;
+            }
+
+            .errors{
+                position:unset;
+                color:red;
+                font-size: x-small;
+                border: 0;
+                font-weight: bold;
+                width: fit-content;
+            }
+
+
+        </style>
+        
+    </head>
+
+    <body>
+        <div class="container" id="square">
+            <h2 id="head2">Log In To Your Account<br></h2>
+            <form id="frm" onsubmit="return false;">
+                <input id="email" type="text" name="uName" size="30 cm" placeholder="Email or phone or username">
+                <br>
+                <span id="eError" class="errors"></span>
+                <br>
+                <script>
+                   /* const email=document.getElementById('email');
+                    const msg1=document.getElementById('eError');
+
+                    function validEmail(){
+                        if(!email.value.match( /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
+                        {
+                            msg1.innerHTML="Invalid email address";
+                            return false;
+                        }
+
+                        msg1.innerHTML="";
+                        return true;
+                    }*/
+
+                </script>
+
+
+                <input id="password" type="password" name="pass" size="30 cm" placeholder="Password" >
+                <span id="pError" class="errors"></span>
+
+
+                <script>
+                   /* const password=document.getElementById('password');
+                    const msg2=document.getElementById('pError');
+
+                    function validPassword(){
+
+                        if (!(/[A-Z]/.test(password.value)))
+                        {
+                            msg2.innerHTML="Password must include an uppercase character";
+                            return false;
+                        }
+
+                        else
+                        {
+                            if (!(/[a-z]/.test(password.value)))
+                            {
+                                msg2.innerHTML="Password must include an lowercase character";
+                                return false;
+                            }
+
+                            else if (!(/[0-9]/.test(password.value)))
+                            {
+                                msg2.innerHTML="Password must include a number";
+                                return false;
+                            }
+
+                            else if (!(/[!@#$%^&*()\[\]\-_=+\\|{};:/?.,><]/.test(password.value))) 
+                            {
+                                msg2.innerHTML="Password must include: !@#$%^&*()-_=+\|[]{};:/?.><";
+                                return false;
+                            }
+
+                            else{
+                                if (!(/.{6,}/.test(password.value))) {
+                                    msg2.innerHTML="Password must have minimum 6 characters";
+                                    return false;
+                                }
+
+                                else
+                                {
+                                    msg2.innerHTML="";
+                                    return true;
+                                }
+                            }
+                        }    
+                    }*/
+
+                </script> 
+                <br><br>
+                <a class=text2 href="https://google.com">forgot password?</a>
+                <br><br><br>
+            </form>
+
+            <button id="butt" onclick="loginFunc()">Log in</button>
+            <br><br>
+            <p class=text>Need an account?</p>
+            <a class=text href='signUp.html'>Sign up</a>
+
+        </div>
+    </body>
+</html>

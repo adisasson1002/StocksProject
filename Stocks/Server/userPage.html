@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Latest compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css"
+    />
+
+    <link href="./style.css" rel="stylesheet" />
+
+    <title>Wellcome</title>
+
+    <script>
+      $(document).ready(function() 
+      {
+        function fetchStocksData() 
+        {
+          $.ajax({
+            url: '/u-page?_=' + Date.now(), 
+            method: 'GET',
+            success: function(response) 
+            {
+              $('.stocks-table-body').empty();
+              response?.forEach(function(stock, index) 
+              {
+                var row = $('<tr>');
+                var rowNumber = $('<td>').text(index + 1);
+                row.append(rowNumber);
+
+                var stockName = $('<td>').text(stock.name);
+                row.append(stockName);
+
+                var cost = $('<td>').text(stock.cost);
+                row.append(cost);
+
+                var deleteButton = $('<td>');
+                var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');;
+                  deleteButtonElement.append('<i class="bi-sm bi-trash3 icon-red"></i>');
+                  deleteButtonElement.on('click', function() {
+                    deleteStock();// func
+                  });
+                deleteButton.append(deleteButtonElement);
+                row.append(deleteButton);
+
+                $('.stocks-table-body').append(row);
+              });
+            },
+            error: function(error) 
+            {
+              console.error('Error retrieving stocks data:', error);
+            }
+
+          });
+        }
+
+        // Fetch stocks data on page load
+        fetchStocksData();
+      });
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Wellcome</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarTogglerDemo02"
+          aria-controls="navbarTogglerDemo02"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+  
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+          <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item active">
+              <a class="nav-link" href="#"
+                >Home <span class="sr-only">(current)</span></a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link disabled" href="#">Disabled</a>
+            </li>
+          </ul>
+            <input
+              class="form-control mr-sm-2"
+              type="search"
+              placeholder="Search"
+            />
+  
+            <button class="btn btn-outline-warning my-2 my-sm-0" type="submit"><i class="bi-sm bi-search"></i>
+            </button>
+        </div>
+      </nav>
+
+
+      <table class="table table-hover" id="tbl">
+        <thead id="thd">
+          <tr>
+            <th scope="col">No. </th>
+            <th scope="col">Stock's name</th>
+            <th scope="col">cost</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody class="stocks-table-body">
+        </tbody>
+      </table>
+
+      </div>
+    </div>
+    
+
+    
+  </body>
+</html>

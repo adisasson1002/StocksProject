@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <!-- Popper JS -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+
+        <title>Sign Up Page</title>
+
+
+
+       <style>
+            body{
+                background-image:url('background.jpg');
+                padding-top: 40px;
+            }
+
+            #square{
+                background-color: white;
+                text-align: left;
+                width: 400px;
+                height: 500px;
+                justify-content: center;
+                align-items: left;
+                border-radius: 30px;
+            }
+
+            #fr{
+                padding-left: 20px;
+            }
+
+            #head2{
+                font-family:'Calibri light';
+                font-size: 30px;
+                font-weight: bold;
+                padding-top: 20px;
+                margin-bottom: 20px;
+                padding-left: 20px;
+            }
+
+            #box{
+                font-weight: bold;
+                font-size: 14px;
+                padding-bottom: 20px;
+            }
+
+            .text {
+                font-size: 13px;
+                font-family:'Calibri light';
+                display: inline-block;
+                padding-left: 20px;
+
+            }
+
+            #butt{
+                color: white;
+                background-color:#c3195d;
+                border-radius: 10px;
+                border-color: #c3195d;
+            }
+
+            .errors{
+                position: absolute;
+                color:red;
+                font-size: x-small;
+                border: 0;
+                padding-top: 5px;
+            }
+
+        </style>
+    </head>
+
+    <script>
+            function validateForm(){
+                const email=document.getElementById('eInput');
+                const elbl=document.getElementById('eLabel');
+                const msg1=document.getElementById('eErr');
+                const password=document.getElementById('pInput');
+                const plbl=document.getElementById('pLabel');
+                const msg2=document.getElementById('pErr');
+                const conf=document.getElementById('cInput');
+                const msg3=document.getElementById('cErr');
+
+                if(!email.value.match( /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/))
+                {
+                    msg1.innerHTML="Invalid email address";
+                }
+
+                else{
+                    msg1.innerHTML="";
+
+                    if (!(/[A-Z]/.test(password.value)))
+                    {
+                        msg2.innerHTML="Password must include an uppercase character";
+                    }
+
+                    else
+                    {
+                        if (!(/[a-z]/.test(password.value)))
+                        {
+                            msg2.innerHTML="Password must include an lowercase character";
+                        }
+
+                        else if (!(/[0-9]/.test(password.value)))
+                        {
+                            msg2.innerHTML="Password must include a number";
+                        }
+
+                        else if (!(/[!@#$%^&*()\[\]\-_=+\\|{};:/?.,><]/.test(password.value))) 
+                        {
+                            msg2.innerHTML="Password must include: !@#$%^&*()-_=+\|[]{};:/?.><";
+                        }
+
+                        else{
+                            if (!(/.{6,}/.test(password.value))) {
+                                msg2.innerHTML="Password must have minimum 6 characters";
+                            }
+
+                            else
+                            {
+                                msg2.innerHTML="";
+                                if(password.value!=conf.value)
+                                {
+                                    msg3.innerHTML="Password and confirmation must be identical";
+                                }
+                                
+                                else{
+
+                                var data = {
+                                    mail: email.value,
+                                    password: password.value
+                                    };
+                                    // Send the Ajax request
+                                    $.ajax({
+                                        url: '/sign-up',
+                                        type: 'POST',
+                                        data: data,
+                                        success: function(response) {
+                                            if (response.redirect) {
+                                                window.location.href = response.redirect;
+                                            }
+                                        },
+                                        error: function(xhr, status, error) {
+                                            if(xhr.status==400)
+                                                alert('User does not exist in the system');
+                                            console.error(error);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }    
+                }
+
+                                
+            }
+
+            //const button = document.getElementById('butt');
+            //button.addEventListener('click', confirm);
+    </script>
+
+
+    <body>
+        <div class="container" id="square">
+            <h2 id="head2">Sign Up<br></h2>
+            <form id="fr" onsubmit="return false;">
+                <div class="form-group w-75" id="box">
+                    <label id="eLabel">Email</label>
+                    <input type="email" class="form-control" id="eInput" name="mail">
+                    <span id="eErr" class="errors"></span>
+                </div>
+
+                <div class="form-group w-75" id="box">
+                    <label id="pLabel">Password</label>
+                    <input type="password" class="form-control" id="pInput" name="password" >
+                    <span id="pErr" class="errors"></span>
+                </div>
+
+                <div class="form-group w-75" id="box">
+                    <label id="cLabel">Confirmation</label>
+                    <input type="password" class="form-control" id="cInput" name="confirm">
+                    <span id="cErr" class="errors"></span>
+
+                </div>
+            </form>
+            
+            <button id="butt" type="create" class="btn btn-info btn-sm'" onclick="validateForm()">Create My Account</button>
+            <p class=text>Already a member?<a class=text href='ex2.html'>Sign in</a></p>
+
+        </div>
+    </body>
+</html>
