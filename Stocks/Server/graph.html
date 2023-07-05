@@ -1,130 +1,175 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Stock Graph</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    nav ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      background-color: #f2f2f2;
-      overflow: hidden;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    nav li {
-      float: left;
-    }
+    <!-- Latest compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <!-- jcQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 
-    nav li a {
-      display: block;
-      padding: 15px;
-      text-decoration: none;
-      color: #333;
-      cursor: pointer;
-    }
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.4/font/bootstrap-icons.css"
+    />
 
-    .container {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <ul>
-      <li><a href="#" onclick="selectFrequency('daily')">Daily</a></li>
-      <li><a href="#" onclick="selectFrequency('weekly')">Weekly</a></li>
-      <li><a href="#" onclick="selectFrequency('monthly')">Monthly</a></li>
-    </ul>
-  </nav>
-  <div class="container">
-    <canvas id="myChart"></canvas>
-  </div>
-  <script>
-    let frequency = 'daily';
-    let myChart;
-
-    function selectFrequency(selectedFrequency) {
-      frequency = selectedFrequency;
-      fetchData();
-    }
-
-    function fetchData() {
-      const apiKey = 'B2CEGNRYP0PYNG67';
-      const symbol = 'NVDA';
-
-      let apiUrl = '';
-      let label = '';
-      let timeSeriesKey = '';
-
-      if (frequency === 'daily') {
-        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${apiKey}`;
-        label = 'Daily Closing Price';
-        timeSeriesKey = 'Time Series (Daily)';
-      } else if (frequency === 'weekly') {
-        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${symbol}&apikey=${apiKey}`;
-        label = 'Weekly Closing Price';
-        timeSeriesKey = 'Weekly Time Series';
-      } else if (frequency === 'monthly') {
-        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${symbol}&apikey=${apiKey}`;
-        label = 'Monthly Closing Price';
-        timeSeriesKey = 'Monthly Time Series';
+    <link href="./style.css" rel="stylesheet" />
+    <title>Stock Graph</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      nav ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        background-color: #f2f2f2;
+        overflow: hidden;
       }
 
-      fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data); // Log the fetched data for debugging purposes
+      nav li {
+        float: left;
+      }
 
-          const timeSeriesData = data[timeSeriesKey];
-          const dates = Object.keys(timeSeriesData);
-          const closingPrices = dates.map(date => parseFloat(timeSeriesData[date]['4. close']));
+      nav li a {
+        display: block;
+        padding: 15px;
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+      }
 
-          const ctx = document.getElementById('myChart').getContext('2d');
-          if (myChart) {
-            myChart.destroy();
-          }
-          myChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels: dates,
-              datasets: [{
-                label: label,
-                data: closingPrices,
-                borderColor: 'blue',
-                fill: false
-              }]
-            },
-            options: {
-              scales: {
-                x: {
-                  ticks: {
-                    autoSkip: true,
-                    maxTicksLimit: 10
-                  },
-                  display: true,
-                  title: {
-                    display: true,
-                    text: 'Date'
-                  }
-                },
-                y: {
-                  display: true,
-                  title: {
-                    display: true,
-                    text: 'Closing Price'
-                  }
-                }
-              }
+      .container {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <ul>
+        <li><a href="#" onclick="selectFrequency('daily')">Daily</a></li>
+        <li><a href="#" onclick="selectFrequency('weekly')">Weekly</a></li>
+        <li><a href="#" onclick="selectFrequency('monthly')">Monthly</a></li>
+        <li>
+          <!-- <i
+            class="bi-sm btn-outline-danger bi-x-square"
+            id="exit_return"
+            onclick="window.location.href='/userPage.html'"
+          ></i> -->
+          <button
+            type="button"
+            class="btn btn-danger"
+            style="margin-top: 10px; margin-left: 10px"
+            onclick="window.location.href='/userPage.html'"
+          >
+            Back
+          </button>
+        </li>
+      </ul>
+    </nav>
+    <div class="container">
+      <canvas id="myChart"></canvas>
+    </div>
+    <script>
+      let frequency = "daily";
+      let myChart;
+
+      function selectFrequency(selectedFrequency) {
+        frequency = selectedFrequency;
+        fetchData();
+      }
+
+      function fetchData() {
+        const apiKey = "B2CEGNRYP0PYNG67";
+        const urlPath = window.location.pathname;
+
+        // Extract data from the URL path
+        const pathSegments = urlPath.split("/"); // Split the path by '/'
+        const stockN = pathSegments[2];
+        const symbol = stockN;
+
+        let apiUrl = "";
+        let label = "";
+        let timeSeriesKey = "";
+
+        if (frequency === "daily") {
+          apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${apiKey}`;
+          label = "Daily Closing Price";
+          timeSeriesKey = "Time Series (Daily)";
+        } else if (frequency === "weekly") {
+          apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${symbol}&apikey=${apiKey}`;
+          label = "Weekly Closing Price";
+          timeSeriesKey = "Weekly Time Series";
+        } else if (frequency === "monthly") {
+          apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${symbol}&apikey=${apiKey}`;
+          label = "Monthly Closing Price";
+          timeSeriesKey = "Monthly Time Series";
+        }
+
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data); // Log the fetched data for debugging purposes
+
+            const timeSeriesData = data[timeSeriesKey];
+            const dates = Object.keys(timeSeriesData);
+            const closingPrices = dates.map((date) =>
+              parseFloat(timeSeriesData[date]["4. close"])
+            );
+
+            const ctx = document.getElementById("myChart").getContext("2d");
+            if (myChart) {
+              myChart.destroy();
             }
+            myChart = new Chart(ctx, {
+              type: "line",
+              data: {
+                labels: dates,
+                datasets: [
+                  {
+                    label: label,
+                    data: closingPrices,
+                    borderColor: "blue",
+                    fill: false,
+                  },
+                ],
+              },
+              options: {
+                scales: {
+                  x: {
+                    ticks: {
+                      autoSkip: true,
+                      maxTicksLimit: 10,
+                    },
+                    display: true,
+                    title: {
+                      display: true,
+                      text: "Date",
+                    },
+                  },
+                  y: {
+                    display: true,
+                    title: {
+                      display: true,
+                      text: "Closing Price",
+                    },
+                  },
+                },
+              },
+            });
+          })
+          .catch((error) => {
+            console.log("Error:", error);
           });
-        })
-        .catch(error => {
-          console.log('Error:', error);
-        });
-    }
+      }
 
-    fetchData(); // Fetch the initial data
-  </script>
-</body>
+      fetchData(); // Fetch the initial data
+    </script>
+  </body>
 </html>

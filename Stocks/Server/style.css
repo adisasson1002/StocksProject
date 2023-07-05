@@ -1,107 +1,104 @@
-*{
-    padding:0;
-    margin:0;
-    box-sizing: border-box;
-    font-family:'Calibri light';
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Calibri light";
 }
 
-body{
-    background-image:url('background.jpg');
-    background-repeat: no-repeat;
-    margin-top: 70px;
+body {
+  background-image: url("background.jpg");
+  background-repeat: no-repeat;
+  margin-top: 70px;
 }
 
-#con{
-    background-color: white;
+#con {
+  background-color: white;
 }
 
-
-.col-md-8{
-    padding: 8px;
+.col-md-8 {
+  padding: 8px;
 }
 
-.col-md-4{
-    background-color: #e3e3e3;
+.col-md-4 {
+  background-color: #e3e3e3;
 }
 
-.bi{
-    font-size: 40px; 
-    padding-right: 40px;
+.bi {
+  font-size: 40px;
+  padding-right: 40px;
 }
 
-.d-flex{
-    padding-top: 10px;
-    padding-bottom: 10px;
+.d-flex {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
-
-
-#butt{
-    background-color:#c3195d;
-    border-radius: 10px;
-    border-color: #c3195d;
+#butt {
+  background-color: #c3195d;
+  border-radius: 10px;
+  border-color: #c3195d;
 }
 
-#tit{
-    font-family:'Calibri light';
-    font-weight: bolder;
-}
-  
-#stock-content{
-    background-color: #c3195d;
-    margin-top: 10px;
-    padding-top: 10px;
-    color: white;
+#tit {
+  font-family: "Calibri light";
+  font-weight: bolder;
 }
 
-#mynavbar{
-    background-color: #c3195d;
-    color: white;
-    border-radius: 20px;
-
+#stock-content {
+  background-color: #c3195d;
+  margin-top: 10px;
+  padding-top: 10px;
+  color: white;
 }
 
-
-.stocks-table-body{
-    background-color: white;
-    border-color: transparent;
-    font-family: Tahoma;
+#mynavbar {
+  background-color: #c3195d;
+  color: white;
+  border-radius: 20px;
 }
 
-#thd{
-    color:white;
-    background-color: #c3195d;
+.stocks-table-body {
+  background-color: white;
+  border-color: transparent;
+  font-family: Tahoma;
 }
 
-#tbl{
-    margin-top: 10px;
+#thd {
+  color: white;
+  background-color: #c3195d;
+}
+
+#tbl {
+  margin-top: 10px;
 }
 
 .delete-button {
-    background-color: red; /* Set the button background color as white */
-    border-color:red;
-  }
-
-.icon-red{
-    color:white;
+  background-color: red; /* Set the button background color as white */
+  border-color: red;
 }
 
-.navbar-brand{
-    padding-right: 20px;
+.icon-red {
+  color: white;
 }
 
-#srch{
-    padding-right: 10px;
-    padding-left: 10px;
-    width: 700px;
+.navbar-brand {
+  padding-right: 20px;
 }
 
-#bsrch{
-    padding-right: 60px;
+#srch {
+  padding-right: 10px;
+  padding-left: 10px;
+  width: 700px;
 }
 
-#exit
-{
-    margin-left: 650px;
+#bsrch {
+  padding-right: 60px;
 }
 
+#exit {
+  margin-left: 650px;
+}
+
+#exit_return {
+  margin-left: 200x;
+}

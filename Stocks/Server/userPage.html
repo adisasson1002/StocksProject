@@ -32,7 +32,8 @@
         function fetchStocksData() 
         {
           $.ajax({
-            url: '/u-page?_=' + Date.now(), 
+            // url: '/u-page?_=' + Date.now(),
+            url: '/u-page', 
             method: 'GET',
             success: function(response) 
             {
@@ -49,6 +50,14 @@
                 var cost = $('<td>').text(stock.cost);
                 row.append(cost);
 
+                var watchButton = $('<td>');
+                var watchElement = $('<button>').addClass('btn btn-success text-white').text("Watch Graph");
+                  watchElement.on('click', function() {
+                    watchStock(stock.name); 
+                  });
+                watchButton.append(watchElement);
+                row.append(watchButton);
+
                 var deleteButton = $('<td>');
                 var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');
                   deleteButtonElement.append('<i class="bi-sm bi-trash3 icon-red"></i>');
@@ -57,6 +66,7 @@
                   });
                 deleteButton.append(deleteButtonElement);
                 row.append(deleteButton);
+                
 
                 $('.stocks-table-body').append(row);
               });
@@ -145,6 +155,23 @@ function deleteStock(stockName) {
       }
     });
   }
+  function watchStock(stockName) {
+    // Send AJAX request to delete the stock
+    $.ajax({
+      url: '/get-graph',
+      method: 'POST',
+      data: {stock: stockName },
+      success: function(response) {
+        if (response.redirect) {
+          window.location.href = response.redirect;
+        }
+      },
+      error: function(error) {
+        console.error('Error deleting stock:', error);
+      }
+    });
+  }
+
 
 
   function logOut(){
@@ -205,6 +232,7 @@ function deleteStock(stockName) {
             <th scope="col">No. </th>
             <th scope="col">Stock's name</th>
             <th scope="col">cost</th>
+            <th scope="col"></th>
             <th scope="col"></th>
           </tr>
         </thead>

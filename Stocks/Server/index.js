@@ -1,32 +1,42 @@
 const express = require("express");
-const session=require("express-session");
+const session = require("express-session");
 var path = require("path");
 const bodyParser = require("body-parser");
-const request = require('request');
+const request = require("request");
 const app = express();
 var port = process.env.PORT || 8080;
-const apiKey = 'B2CEGNRYP0PYNG67';
+const apiKey = "B2CEGNRYP0PYNG67";
 const { MongoClient } = require("mongodb");
+const nodemailer = require("nodemailer");
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 app.use(express.static(__dirname));
 
-app.use(session({
-  secret:'mysecretkey', 
-  resave:false, 
-  saveUninitialized:true}));
-
+app.use(
+  session({
+    secret: "mysecretkey",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "/loginPage.html"));
 });
 
-app.get("/user-page/:id", function (req, res) {
+app.get("/user-page", function (req, res) {
   res.sendFile(path.join(__dirname, "/userPage.html"));
 });
-
-
+app.get("/graph/:stock", function (req, res) {
+  res.sendFile(path.join(__dirname, "/graph.html"));
+});
+app.post("/get-graph", function (req, res) {
+  var redi = "/graph/" + req.body.stock;
+  res.status(200).json({ redirect: redi });
+});
 app.post("/sign-up", async function (req, res) {
   var user_mail = req.body.mail;
   var pswd = req.body.password;
@@ -47,7 +57,7 @@ app.post("/sign-up", async function (req, res) {
     console.log(res);
 
     if (d) {
-      res.status(400).json({redirect: null});
+      res.status(400).json({ redirect: null });
       return;
     } else {
       const document = query;
@@ -84,11 +94,10 @@ app.post("/login", async function (req, res) {
     console.log(res);
 
     if (d) {
-      req.session.clientData=query;
-      res.status(200).json({ redirect: "/user-page/55" });
-    
+      req.session.clientData = query;
+      res.status(200).json({ redirect: "/user-page" });
     } else {
-      res.status(400).json({redirect: null});
+      res.status(400).json({ redirect: null });
       return;
     }
   } catch (e) {
@@ -99,7 +108,6 @@ app.post("/login", async function (req, res) {
 
   //await connectToMongoDB(); // Wait for the connection to be established
 });
-
 
 // start the server
 app.listen(port, () => {
@@ -114,7 +122,7 @@ async function listDatabases(client) {
 
 app.get("/u-page", async function (req, res) {
   var user_mail = req.session.clientData.email;
-  var query = { "email": user_mail };
+  var query = { email: user_mail };
   const url =
     "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
   const client = new MongoClient(url);
@@ -142,19 +150,21 @@ app.get("/u-page", async function (req, res) {
           {
             url: url,
             json: true,
-            headers: { 'User-Agent': 'request' }
+            headers: { "User-Agent": "request" },
           },
           (err, res, data) => {
             if (err) {
-              console.log('Error:', err);
+              console.log("Error:", err);
               reject(err);
             } else if (res.statusCode !== 200) {
-              console.log('Status:', res.statusCode);
-              reject(new Error(`Request failed with status code ${res.statusCode}`));
+              console.log("Status:", res.statusCode);
+              reject(
+                new Error(`Request failed with status code ${res.statusCode}`)
+              );
             } else {
               // data is successfully parsed as a JSON object:
-              let quote = data['Global Quote'];
-              let jstock = { "name": doc.stock, "cost": quote['05. price'] };
+              let quote = data["Global Quote"];
+              let jstock = { name: doc.stock, cost: quote["05. price"] };
               resolve(jstock);
             }
           }
@@ -178,10 +188,9 @@ app.get("/u-page", async function (req, res) {
   }
 });
 
-
 app.post("/search", async function (req, res) {
   var user_mail = req.session.clientData.email;
-  var query = { "email": user_mail , "stock": req.body.stock };
+  var query = { email: user_mail, stock: req.body.stock };
 
   const durl =
     "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
@@ -199,16 +208,14 @@ app.post("/search", async function (req, res) {
     console.log(res);
 
     if (d) {
-      res.status(400).json({msg:"The stock already exist"});
+      res.status(400).json({ msg: "The stock already exist" });
       return;
     }
-
   } catch (e) {
     console.error(e);
   } finally {
     await client.close();
   }
-
 
   // Create an array of promises to store each request
   let url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${req.body.stock}&apikey=${apiKey}`;
@@ -219,24 +226,30 @@ app.post("/search", async function (req, res) {
       {
         url: url,
         json: true,
-        headers: { 'User-Agent': 'request' }
+        headers: { "User-Agent": "request" },
       },
       (err, response, data) => {
         if (err) {
-          console.log('Error:', err);
+          console.log("Error:", err);
           reject(err);
         } else if (response.statusCode !== 200) {
-          console.log('Status:', response.statusCode);
-          reject(new Error(`Request failed with status code ${response.statusCode}`));
+          console.log("Status:", response.statusCode);
+          reject(
+            new Error(`Request failed with status code ${response.statusCode}`)
+          );
         } else {
           // data is successfully parsed as a JSON object:
-          let quote = data['Global Quote'];
-          if (quote == null || quote === undefined||Object.keys(quote).length === 0) {
-            res.status(400).json({msg:"This stock does not exist"});
+          let quote = data["Global Quote"];
+          if (
+            quote == null ||
+            quote === undefined ||
+            Object.keys(quote).length === 0
+          ) {
+            res.status(400).json({ msg: "This stock does not exist" });
             return;
           }
 
-          let jstock = { "name": req.body.stock, "cost": quote['05. price'] };
+          let jstock = { name: req.body.stock, cost: quote["05. price"] };
           resolve(jstock);
         }
       }
@@ -280,11 +293,9 @@ app.post("/search", async function (req, res) {
   }
 });
 
-  
-
 app.post("/delete-stock", async function (req, res) {
   var user_mail = req.session.clientData.email;
-  var query = { "email": user_mail , "stock": req.body.stockName };
+  var query = { email: user_mail, stock: req.body.stockName };
 
   const durl =
     "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
@@ -300,7 +311,6 @@ app.post("/delete-stock", async function (req, res) {
     const collection = database.collection("user_stocks");
     const d = await collection.deleteOne(query);
     res.status(200).send("ok");
-
   } catch (e) {
     console.error(e);
   } finally {
@@ -308,15 +318,66 @@ app.post("/delete-stock", async function (req, res) {
   }
 });
 
-
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   // Destroy the session to log out the user
   req.session.destroy((err) => {
     if (err) {
-      console.error('Error destroying session:', err);
+      console.error("Error destroying session:", err);
     }
 
     res.status(200).json({ redirect: "/" });
-    
+  });
+});
+
+app.post("/send-email", (req, res) => {
+  // Extract the recipient's email and email body from the request
+  const text_contact = req.body.contact;
+  const email = req.body.email;
+  recipientEmail = "taliabluom@gmail.com";
+
+  // Create a Nodemailer transporter
+  // const transporter1 = nodemailer.createTransport({
+  //   // Configure your email provider here
+  //   service: "Walla",
+  //   auth: {
+  //     user: "taliaadi1234@walla.co.il",
+  //     pass: "13579Adi!",
+  //   },
+  // });
+  // const transporter = nodemailer.createTransport({
+  //   host: "smtp.walla.co.il",
+  //   port: 587,
+  //   secure: false, // Set to true if using SSL/TLS encrypted connection (port 465)
+  //   auth: {
+  //     user: "taliaadi1234@walla.co.il",
+  //     pass: "13579Adi!",
+  //   },
+  // });
+  const transporter = nodemailer.createTransport({
+    host: "smtp.office365.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: "taliaadi@outlook.com",
+      pass: "Ida123456!!",
+    },
+  });
+
+  // Define the email options
+  const mailOptions = {
+    from: "taliaadi@outlook.com",
+    to: recipientEmail,
+    subject: "contact us",
+    text: email + " send you a new message: " + text_contact,
+  };
+
+  // Send the email
+  transporter.sendMail(mailOptions, (error, info) => {
+    if (error) {
+      console.error(error);
+      res.status(500).send("Failed to send email");
+    } else {
+      res.status(200).json({ redirect: "/user-page" });
+    }
   });
 });
