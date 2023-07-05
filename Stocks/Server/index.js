@@ -30,6 +30,43 @@ app.get("/", function (req, res) {
 app.get("/user-page", function (req, res) {
   res.sendFile(path.join(__dirname, "/userPage.html"));
 });
+app.get("/check-login", function (req, res) {
+  const username = req.cookies.username;
+  const password = req.cookies.password;
+
+  // if (req.session.clientData)
+  if (username && password) {
+    // User is already logged in
+    req.session.clientData = { email: username, password: password };
+    res.status(200).json({ loggedIn: true, redirect: "/user-page" });
+  } else {
+    // User is not logged in
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+    });
+    res.status(200).json({ loggedIn: false });
+  }
+  // if (req.session.clientData) {
+  //   // User is logged in via session
+  //   res.sendFile(path.join(__dirname, "/userPage.html"));
+  // } else {
+  //   const username = req.cookies.username;
+  //   const password = req.cookies.password;
+
+  //   if (username && password) {
+  //     // User is logged in via "Remember Me" cookies
+  //     // Validate the credentials against the database or any other method you use for validation
+  //     // For simplicity, this example assumes a successful validation
+  //     req.session.clientData = { email: username, password: password };
+  //     res.sendFile(path.join(__dirname, "/userPage.html"));
+  //   } else {
+  //     // User is not logged in, redirect to the login page
+  //     res.redirect("/");
+  //   }
+  // }
+});
 app.get("/graph/:stock", function (req, res) {
   res.sendFile(path.join(__dirname, "/graph.html"));
 });
@@ -41,8 +78,7 @@ app.post("/sign-up", async function (req, res) {
   var user_mail = req.body.mail;
   var pswd = req.body.password;
   var query = { email: user_mail, password: pswd };
-  const url =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -77,9 +113,9 @@ app.post("/sign-up", async function (req, res) {
 app.post("/login", async function (req, res) {
   var user_mail = req.body.email;
   var pswd = req.body.password;
+  var rememberMe = req.body.rememberMe; // Added rememberMe fieldx
   var query = { email: user_mail, password: pswd };
-  const url =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -95,10 +131,21 @@ app.post("/login", async function (req, res) {
 
     if (d) {
       req.session.clientData = query;
+
+      if (rememberMe) {
+        // Set user name and password as cookies
+        res.cookie("username", req.body.email, {
+          maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
+        });
+        res.cookie("password", req.body.password, {
+          maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
+        });
+      } else {
+        res.clearCookie("username");
+        res.clearCookie("password");
+      }
+
       res.status(200).json({ redirect: "/user-page" });
-    } else {
-      res.status(400).json({ redirect: null });
-      return;
     }
   } catch (e) {
     console.error(e);
@@ -123,8 +170,7 @@ async function listDatabases(client) {
 app.get("/u-page", async function (req, res) {
   var user_mail = req.session.clientData.email;
   var query = { email: user_mail };
-  const url =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -193,7 +239,7 @@ app.post("/search", async function (req, res) {
   var query = { email: user_mail, stock: req.body.stock };
 
   const durl =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+    "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(durl);
 
   try {
@@ -268,7 +314,7 @@ app.post("/search", async function (req, res) {
     }
 
     const conurl =
-      "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+      "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
     const client = new MongoClient(conurl);
 
     try {
@@ -298,7 +344,7 @@ app.post("/delete-stock", async function (req, res) {
   var query = { email: user_mail, stock: req.body.stockName };
 
   const durl =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+    "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(durl);
 
   try {
@@ -324,9 +370,11 @@ app.get("/logout", (req, res) => {
     if (err) {
       console.error("Error destroying session:", err);
     }
-
-    res.status(200).json({ redirect: "/" });
   });
+  res.clearCookie("username");
+  res.clearCookie("password");
+
+  res.status(200).json({ redirect: "/" });
 });
 
 app.post("/send-email", (req, res) => {

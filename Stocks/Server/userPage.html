@@ -126,7 +126,13 @@ function addRowToTable(stock) {
 
   var cost = $('<td>').text(stock.cost);
   row.append(cost);
-
+  var watchButton = $('<td>');
+  var watchElement = $('<button>').addClass('btn btn-success text-white').text("Watch Graph");
+  watchElement.on('click', function() {
+      watchStock(stock.name); 
+        });
+    watchButton.append(watchElement);
+    row.append(watchButton);
   var deleteButton = $('<td>');
   var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');
   deleteButtonElement.append('<i class="bi-sm bi-trash3 icon-red"></i>');
@@ -196,32 +202,21 @@ function deleteStock(stockName) {
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Wellcome</a>
-        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <div class="collapse navbar-collapse navbar-nav" id="navbarTogglerDemo02">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
             <li class="nav-item">
               <a class="nav-link" href="/contactUs.html">Contact us</a>
             </li>
-
             <li class="nav-item" id="srch">
-              <input
-              class="form-control mr-sm-2"
-              type="search"
-              placeholder="Search"
-              id="stkName"
-            />
+              <input class="form-control mr-sm-2" type="search" placeholder="Search" id="stkName" />
             </li>
-
             <li class="nav-item" id="bsrch">
               <button class="btn btn-outline my-2 my-sm-0" type="submit" onclick="searchStock()"><i class="bi-sm bi-search"></i></button>
             </li>
-
             <li class="nav-item" id="logout">
               <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" onclick="logOut()">Logout</button>
             </li>
-
           </ul>
-            
-  
         </div>
       </nav>
 

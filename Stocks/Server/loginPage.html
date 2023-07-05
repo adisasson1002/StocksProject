@@ -19,9 +19,28 @@
     <title>Log-in Page</title>
 
     <script>
+      $(document).ready(function () {
+        // Check if the user is already logged in
+        $.ajax({
+          url: "/check-login",
+          type: "GET",
+          success: function (response) {
+            if (response.loggedIn) {
+              window.location.href = response.redirect;
+            } else {
+              // User is not logged in, show the login page
+              $("#square").show();
+            }
+          },
+          error: function (xhr, status, error) {
+            console.error(error);
+          },
+        });
+      });
       function loginFunc() {
         const email = document.getElementById("email");
         const password = document.getElementById("password");
+        const rememberMe1 = document.getElementById("rememberMe").checked;
 
         let validMail =
           /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
@@ -40,6 +59,7 @@
             var data = {
               email: email.value,
               password: password.value,
+              rememberMe: rememberMe1,
             };
             // Send the Ajax request
             $.ajax({
@@ -207,7 +227,17 @@
                     }*/
         </script>
         <br /><br />
-        <br /><br /><br />
+        <br /><br />
+        <div class="form-group form-check">
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="rememberMe"
+            name="rememberMe"
+          />
+          <label class="form-check-label" for="rememberMe">Remember me</label>
+        </div>
+        <br />
       </form>
 
       <button id="butt" onclick="loginFunc()">Log in</button>
