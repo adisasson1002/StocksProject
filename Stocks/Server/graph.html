@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stock Graph</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      background-color: #f2f2f2;
+      overflow: hidden;
+    }
+
+    nav li {
+      float: left;
+    }
+
+    nav li a {
+      display: block;
+      padding: 15px;
+      text-decoration: none;
+      color: #333;
+      cursor: pointer;
+    }
+
+    .container {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <ul>
+      <li><a href="#" onclick="selectFrequency('daily')">Daily</a></li>
+      <li><a href="#" onclick="selectFrequency('weekly')">Weekly</a></li>
+      <li><a href="#" onclick="selectFrequency('monthly')">Monthly</a></li>
+    </ul>
+  </nav>
+  <div class="container">
+    <canvas id="myChart"></canvas>
+  </div>
+  <script>
+    let frequency = 'daily';
+    let myChart;
+
+    function selectFrequency(selectedFrequency) {
+      frequency = selectedFrequency;
+      fetchData();
+    }
+
+    function fetchData() {
+      const apiKey = 'B2CEGNRYP0PYNG67';
+      const symbol = 'NVDA';
+
+      let apiUrl = '';
+      let label = '';
+      let timeSeriesKey = '';
+
+      if (frequency === 'daily') {
+        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=${apiKey}`;
+        label = 'Daily Closing Price';
+        timeSeriesKey = 'Time Series (Daily)';
+      } else if (frequency === 'weekly') {
+        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol=${symbol}&apikey=${apiKey}`;
+        label = 'Weekly Closing Price';
+        timeSeriesKey = 'Weekly Time Series';
+      } else if (frequency === 'monthly') {
+        apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_MONTHLY&symbol=${symbol}&apikey=${apiKey}`;
+        label = 'Monthly Closing Price';
+        timeSeriesKey = 'Monthly Time Series';
+      }
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data); // Log the fetched data for debugging purposes
+
+          const timeSeriesData = data[timeSeriesKey];
+          const dates = Object.keys(timeSeriesData);
+          const closingPrices = dates.map(date => parseFloat(timeSeriesData[date]['4. close']));
+
+          const ctx = document.getElementById('myChart').getContext('2d');
+          if (myChart) {
+            myChart.destroy();
+          }
+          myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: dates,
+              datasets: [{
+                label: label,
+                data: closingPrices,
+                borderColor: 'blue',
+                fill: false
+              }]
+            },
+            options: {
+              scales: {
+                x: {
+                  ticks: {
+                    autoSkip: true,
+                    maxTicksLimit: 10
+                  },
+                  display: true,
+                  title: {
+                    display: true,
+                    text: 'Date'
+                  }
+                },
+                y: {
+                  display: true,
+                  title: {
+                    display: true,
+                    text: 'Closing Price'
+                  }
+                }
+              }
+            }
+          });
+        })
+        .catch(error => {
+          console.log('Error:', error);
+        });
+    }
+
+    fetchData(); // Fetch the initial data
+  </script>
+</body>
+</html>

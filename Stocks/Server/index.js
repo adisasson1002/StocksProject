@@ -22,7 +22,7 @@ app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "/loginPage.html"));
 });
 
-app.get("/user-page", function (req, res) {
+app.get("/user-page/:id", function (req, res) {
   res.sendFile(path.join(__dirname, "/userPage.html"));
 });
 
@@ -85,7 +85,7 @@ app.post("/login", async function (req, res) {
 
     if (d) {
       req.session.clientData=query;
-      res.status(200).json({ redirect: "/user-page" });
+      res.status(200).json({ redirect: "/user-page/55" });
     
     } else {
       res.status(400).json({redirect: null});
@@ -100,6 +100,7 @@ app.post("/login", async function (req, res) {
   //await connectToMongoDB(); // Wait for the connection to be established
 });
 
+
 // start the server
 app.listen(port, () => {
   console.log("Server started! At http://localhost:" + port);
@@ -110,118 +111,6 @@ async function listDatabases(client) {
   console.log("Databases:");
   databasesList.databases.forEach((db) => console.log(` - ${db.name}`));
 }
-
-
-/*app.get("/u-page", async function (req, res) {
-  var user_mail = req.session.clientData.email;
-  var query = {"email": user_mail};
-  const url =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
-  const client = new MongoClient(url);
-
-  try {
-    // Connect to the MongoDB cluster
-    await client.connect();
-
-    // Make the appropriate DB calls
-    await listDatabases(client);
-    const database = client.db("Stocks");
-    const collection = database.collection("user_stocks");
-    const d = await collection.find(query);
-    console.log(res);
-
-
-    if (d!=undefined) {
-      let stocks=[];
-      d.data.forEach(stk=> 
-        {
-          let url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${stk.stock}&apikey=${apiKey}`;
-          request(url, (error, response, body) => {
-            if (!error && response.statusCode === 200) 
-            {
-              let data = JSON.parse(body);
-              let quote = data['Global Quote'];
-              let jstock={"name":stk.stock,"cost":quote['05. price']};
-              stocks.push(jstock);
-            } 
-            else 
-            {
-              console.error('Request failed with status code:', response.statusCode);
-            }
-          });
-        });
-    res.status(200).send(stocks);
-    
-  } else {
-    res.status(400).json({redirect: null});
-    return;
-  }
-  } catch (e) {
-    console.error(e);
-  } finally {
-    await client.close();
-  }
-
-  //await connectToMongoDB(); // Wait for the connection to be established
-});
-*/
-
-
-/*app.
-get("/u-page", async function (req, res) {
-  var user_mail = req.session.clientData.email;
-  var query = {"email": user_mail};
-  const url =
-    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
-  const client = new MongoClient(url);
-
-  try {
-    // Connect to the MongoDB cluster
-    await client.connect();
-
-    // Make the appropriate DB calls
-    await listDatabases(client);
-    const database = client.db("Stocks");
-    const collection = database.collection("user_stocks");
-    const cursor = collection.find(query);
-    let stocks=[];
-    for await (const doc of cursor) 
-    {
-      let url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${doc.stock}&apikey=${apiKey}`;
-      
-      request.get({
-        url: url,
-        json: true,
-        headers: {'User-Agent': 'request'}
-      }, (err, res, data) => {
-        if (err) {
-          console.log('Error:', err);
-        } else if (res.statusCode !== 200) {
-          console.log('Status:', res.statusCode);
-        } 
-        else 
-        {
-          // data is successfully parsed as a JSON object:
-         // let d = JSON.parse(data);
-          let quote = data['Global Quote'];
-          let jstock={"name":doc.stock,"cost":quote['05. price']};
-          stocks.push(jstock);
-        }
-
-      });
-  }
-
-  res.status(200).send(stocks);
-
-  } catch (e) {
-    console.error(e);
-  } finally {
-    await client.close();
-  }
-
-  //await connectToMongoDB(); // Wait for the connection to be established
-});
-*/
 
 app.get("/u-page", async function (req, res) {
   var user_mail = req.session.clientData.email;
@@ -290,4 +179,144 @@ app.get("/u-page", async function (req, res) {
 });
 
 
+app.post("/search", async function (req, res) {
+  var user_mail = req.session.clientData.email;
+  var query = { "email": user_mail , "stock": req.body.stock };
 
+  const durl =
+    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+  const client = new MongoClient(durl);
+
+  try {
+    // Connect to the MongoDB cluster
+    await client.connect();
+
+    // Make the appropriate DB calls
+    await listDatabases(client);
+    const database = client.db("Stocks");
+    const collection = database.collection("user_stocks");
+    const d = await collection.findOne(query);
+    console.log(res);
+
+    if (d) {
+      res.status(400).json({msg:"The stock already exist"});
+      return;
+    }
+
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+
+
+  // Create an array of promises to store each request
+  let url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${req.body.stock}&apikey=${apiKey}`;
+
+  // Create a promise for the API request
+  const requestPromise = new Promise((resolve, reject) => {
+    request.get(
+      {
+        url: url,
+        json: true,
+        headers: { 'User-Agent': 'request' }
+      },
+      (err, response, data) => {
+        if (err) {
+          console.log('Error:', err);
+          reject(err);
+        } else if (response.statusCode !== 200) {
+          console.log('Status:', response.statusCode);
+          reject(new Error(`Request failed with status code ${response.statusCode}`));
+        } else {
+          // data is successfully parsed as a JSON object:
+          let quote = data['Global Quote'];
+          if (quote == null || quote === undefined||Object.keys(quote).length === 0) {
+            res.status(400).json({msg:"This stock does not exist"});
+            return;
+          }
+
+          let jstock = { "name": req.body.stock, "cost": quote['05. price'] };
+          resolve(jstock);
+        }
+      }
+    );
+  });
+  //
+
+  try {
+    // Await the API request to finish
+    const stockData = await requestPromise;
+
+    // Check if the stock exists before inserting it into the database
+    if (!stockData.name || !stockData.cost) {
+      res.status(400).json({ redirect: null });
+      return;
+    }
+
+    const conurl =
+      "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+    const client = new MongoClient(conurl);
+
+    try {
+      // Connect to the MongoDB cluster
+      await client.connect();
+
+      // Make the appropriate DB calls
+      await listDatabases(client);
+      const database = client.db("Stocks");
+      const collection = database.collection("user_stocks");
+      const result = await collection.insertOne(query);
+      res.status(200).json(stockData);
+    } catch (e) {
+      console.error(e);
+      res.status(400).send(e);
+    } finally {
+      await client.close();
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(400).send(error);
+  }
+});
+
+  
+
+app.post("/delete-stock", async function (req, res) {
+  var user_mail = req.session.clientData.email;
+  var query = { "email": user_mail , "stock": req.body.stockName };
+
+  const durl =
+    "mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1";
+  const client = new MongoClient(durl);
+
+  try {
+    // Connect to the MongoDB cluster
+    await client.connect();
+
+    // Make the appropriate DB calls
+    await listDatabases(client);
+    const database = client.db("Stocks");
+    const collection = database.collection("user_stocks");
+    const d = await collection.deleteOne(query);
+    res.status(200).send("ok");
+
+  } catch (e) {
+    console.error(e);
+  } finally {
+    await client.close();
+  }
+});
+
+
+app.get('/logout', (req, res) => {
+  // Destroy the session to log out the user
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Error destroying session:', err);
+    }
+
+    res.status(200).json({ redirect: "/" });
+    
+  });
+});

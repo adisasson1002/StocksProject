@@ -50,10 +50,10 @@
                 row.append(cost);
 
                 var deleteButton = $('<td>');
-                var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');;
+                var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');
                   deleteButtonElement.append('<i class="bi-sm bi-trash3 icon-red"></i>');
                   deleteButtonElement.on('click', function() {
-                    deleteStock();// func
+                    deleteStock(stock.name); 
                   });
                 deleteButton.append(deleteButtonElement);
                 row.append(deleteButton);
@@ -71,7 +71,97 @@
 
         // Fetch stocks data on page load
         fetchStocksData();
-      });
+
+  function searchStock() {
+  var stockName = $('#stkName').val();
+
+  if (stockName.trim() === '') {
+    alert('Search bar is empty!');
+    return;
+  }
+
+  var data = { stock: stockName };
+
+  $.ajax({
+    url: '/search',
+    method: 'POST',
+    data: data,
+    success: function(response) {
+      // Assuming the response is a single stock object
+      var newStock = response;
+
+      // Add the new stock row to the table
+      addRowToTable(newStock);
+    },
+    error: function(xhr, status, error) {
+    // Handle error response
+    var errorMessage = xhr.responseJSON.msg;
+    // Display the error message to the client
+    alert(errorMessage);
+  }
+  });
+}
+window.searchStock = searchStock;
+
+// Function to add a new row to the table
+function addRowToTable(stock) {
+  var index = $('.stocks-table-body tr').length + 1;
+
+  var row = $('<tr>');
+  var rowNumber = $('<td>').text(index);
+  row.append(rowNumber);
+
+  var stockName = $('<td>').text(stock.name);
+  row.append(stockName);
+
+  var cost = $('<td>').text(stock.cost);
+  row.append(cost);
+
+  var deleteButton = $('<td>');
+  var deleteButtonElement = $('<button>').addClass('btn btn-danger text-white');
+  deleteButtonElement.append('<i class="bi-sm bi-trash3 icon-red"></i>');
+  deleteButtonElement.on('click', function() {
+    deleteStock(stock.name); // func
+  });
+  deleteButton.append(deleteButtonElement);
+  row.append(deleteButton);
+
+  $('.stocks-table-body').append(row);
+}
+});
+
+function deleteStock(stockName) {
+    // Send AJAX request to delete the stock
+    $.ajax({
+      url: '/delete-stock',
+      method: 'POST',
+      data: { stockName: stockName }, // Replace with the appropriate data structure for stock deletion
+      success: function(response) {
+        var rowToRemove = $('.stocks-table-body').find('td:contains("' + stockName + '")').parent('tr');
+        rowToRemove.remove();
+      },
+      error: function(error) {
+        console.error('Error deleting stock:', error);
+      }
+    });
+  }
+
+
+  function logOut(){
+    $.ajax({
+      url: '/logout',
+      method: 'GET',
+      success: function(response) {
+        if (response.redirect) {
+          window.location.href = response.redirect;
+        }
+      },
+      error: function(error) {
+        console.error('Error deleting stock:', error);
+      }
+    });
+
+  }
     </script>
   </head>
 
@@ -79,40 +169,32 @@
     <div class="container">
       <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Wellcome</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-toggle="collapse"
-          data-target="#navbarTogglerDemo02"
-          aria-controls="navbarTogglerDemo02"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-  
         <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
           <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-            <li class="nav-item active">
-              <a class="nav-link" href="#"
-                >Home <span class="sr-only">(current)</span></a
-              >
-            </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
+              <a class="nav-link" href="/contactUs.html">Contact us</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link disabled" href="#">Disabled</a>
-            </li>
-          </ul>
-            <input
+
+            <li class="nav-item" id="srch">
+              <input
               class="form-control mr-sm-2"
               type="search"
               placeholder="Search"
+              id="stkName"
             />
+            </li>
+
+            <li class="nav-item" id="bsrch">
+              <button class="btn btn-outline my-2 my-sm-0" type="submit" onclick="searchStock()"><i class="bi-sm bi-search"></i></button>
+            </li>
+
+            <li class="nav-item" id="logout">
+              <button class="btn btn-outline-danger my-2 my-sm-0" type="submit" onclick="logOut()">Logout</button>
+            </li>
+
+          </ul>
+            
   
-            <button class="btn btn-outline-warning my-2 my-sm-0" type="submit"><i class="bi-sm bi-search"></i>
-            </button>
         </div>
       </nav>
 
