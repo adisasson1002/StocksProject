@@ -10,6 +10,8 @@ const { MongoClient } = require("mongodb");
 const nodemailer = require("nodemailer");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 app.use(bodyParser.json()); // support json encoded bodies
 app.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
@@ -76,7 +78,17 @@ app.post("/get-graph", function (req, res) {
 });
 app.post("/sign-up", async function (req, res) {
   var user_mail = req.body.mail;
-  var pswd = req.body.password;
+  var plaintextPassword = req.body.password;
+  // const saltRounds = 10;
+  // const fixedSalt = bcrypt.genSaltSync(saltRounds);
+
+  const pswd = crypto
+    .createHash("sha256")
+    .update(plaintextPassword)
+    .digest("hex");
+
+  // const pswd = bcrypt.hashSync(plaintextPassword, fixedSalt);
+
   var query = { email: user_mail, password: pswd };
   const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(url);
@@ -112,8 +124,15 @@ app.post("/sign-up", async function (req, res) {
 
 app.post("/login", async function (req, res) {
   var user_mail = req.body.email;
-  var pswd = req.body.password;
-  var rememberMe = req.body.rememberMe; // Added rememberMe fieldx
+  var plaintextPassword = req.body.password;
+  // const saltRounds = 10;
+  // const fixedSalt = bcrypt.genSaltSync(saltRounds);
+
+  const pswd = crypto
+    .createHash("sha256")
+    .update(plaintextPassword)
+    .digest("hex");
+
   var query = { email: user_mail, password: pswd };
   const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
   const client = new MongoClient(url);
@@ -131,21 +150,16 @@ app.post("/login", async function (req, res) {
 
     if (d) {
       req.session.clientData = query;
-
-      if (rememberMe) {
-        // Set user name and password as cookies
-        res.cookie("username", req.body.email, {
-          maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
-        });
-        res.cookie("password", req.body.password, {
-          maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
-        });
-      } else {
-        res.clearCookie("username");
-        res.clearCookie("password");
-      }
-
+      res.cookie("username", req.body.email, {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
+      });
+      res.cookie("password", req.body.password, {
+        maxAge: 30 * 24 * 60 * 60 * 1000, // Expires in 30 days
+      });
       res.status(200).json({ redirect: "/user-page" });
+    } else {
+      res.status(400).json({ redirect: null });
+      return;
     }
   } catch (e) {
     console.error(e);

@@ -40,26 +40,25 @@
       function loginFunc() {
         const email = document.getElementById("email");
         const password = document.getElementById("password");
-        const rememberMe1 = document.getElementById("rememberMe").checked;
+        const alert1 = document.getElementById("alert1");
 
         let validMail =
           /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        if (!email.value.match(validMail))
-          alert("Invalid mail, please try again.");
-        else {
+        if (!email.value.match(validMail)) {
+          alert1.style.display = "block";
+          alert1.textContent = "Invalid mail, please try again.";
+        } else {
           let validPass =
             /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+\\|[\]{};:/?.,><])[A-Za-z\d!@#$%^&*()\-_=+\\|[\]{};:/?.,><]{6,}$/;
-          if (!password.value.match(validPass))
-            alert(
-              "Password must include:\n Minimum 6 Characters\n ",
-              "Uppercase Character\n Lowercase Character\n a Number\n a Special Character",
-              "\n Supported special characters are: ! @ # $ % ^ & * ( ) - _ = + \ | [ ] { } ; : / ? . > <"
-            );
-          else {
+          if (!password.value.match(validPass)) {
+            alert1.textContent =
+              "Must have Minimum 6 Characters,Uppercase and Lowercase letters,number and Special Character ";
+            alert1.style.display = "block";
+          } else {
+            alert1.style.display = "none";
             var data = {
               email: email.value,
               password: password.value,
-              rememberMe: rememberMe1,
             };
             // Send the Ajax request
             $.ajax({
@@ -227,16 +226,13 @@
                     }*/
         </script>
         <br /><br />
-        <br /><br />
-        <div class="form-group form-check">
-          <input
-            type="checkbox"
-            class="form-check-input"
-            id="rememberMe"
-            name="rememberMe"
-          />
-          <label class="form-check-label" for="rememberMe">Remember me</label>
-        </div>
+        <br />
+        <div
+          class="alert alert-danger"
+          role="alert"
+          id="alert1"
+          style="font-size: 10px; display: none"
+        ></div>
         <br />
       </form>
 
