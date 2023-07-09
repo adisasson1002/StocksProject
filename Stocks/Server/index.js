@@ -10,7 +10,6 @@ const { MongoClient } = require("mongodb");
 const nodemailer = require("nodemailer");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
 app.use(bodyParser.json()); // support json encoded bodies
