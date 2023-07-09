@@ -49,24 +49,6 @@ app.get("/check-login", function (req, res) {
     });
     res.status(200).json({ loggedIn: false });
   }
-  // if (req.session.clientData) {
-  //   // User is logged in via session
-  //   res.sendFile(path.join(__dirname, "/userPage.html"));
-  // } else {
-  //   const username = req.cookies.username;
-  //   const password = req.cookies.password;
-
-  //   if (username && password) {
-  //     // User is logged in via "Remember Me" cookies
-  //     // Validate the credentials against the database or any other method you use for validation
-  //     // For simplicity, this example assumes a successful validation
-  //     req.session.clientData = { email: username, password: password };
-  //     res.sendFile(path.join(__dirname, "/userPage.html"));
-  //   } else {
-  //     // User is not logged in, redirect to the login page
-  //     res.redirect("/");
-  //   }
-  // }
 });
 app.get("/graph/:stock", function (req, res) {
   res.sendFile(path.join(__dirname, "/graph.html"));
@@ -78,18 +60,15 @@ app.post("/get-graph", function (req, res) {
 app.post("/sign-up", async function (req, res) {
   var user_mail = req.body.mail;
   var plaintextPassword = req.body.password;
-  // const saltRounds = 10;
-  // const fixedSalt = bcrypt.genSaltSync(saltRounds);
 
   const pswd = crypto
     .createHash("sha256")
     .update(plaintextPassword)
     .digest("hex");
 
-  // const pswd = bcrypt.hashSync(plaintextPassword, fixedSalt);
-
   var query = { email: user_mail, password: pswd };
-  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+  const url =
+    "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -133,7 +112,8 @@ app.post("/login", async function (req, res) {
     .digest("hex");
 
   var query = { email: user_mail, password: pswd };
-  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+  const url =
+    "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -183,7 +163,8 @@ async function listDatabases(client) {
 app.get("/u-page", async function (req, res) {
   var user_mail = req.session.clientData.email;
   var query = { email: user_mail };
-  const url = "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+  const url =
+    "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
   const client = new MongoClient(url);
 
   try {
@@ -252,7 +233,7 @@ app.post("/search", async function (req, res) {
   var query = { email: user_mail, stock: req.body.stock };
 
   const durl =
-    "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+    "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
   const client = new MongoClient(durl);
 
   try {
@@ -327,7 +308,7 @@ app.post("/search", async function (req, res) {
     }
 
     const conurl =
-      "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+      "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
     const client = new MongoClient(conurl);
 
     try {
@@ -357,7 +338,7 @@ app.post("/delete-stock", async function (req, res) {
   var query = { email: user_mail, stock: req.body.stockName };
 
   const durl =
-    "mongodb+srv://taliabluom:054326Tb@cluster0.t12mock.mongodb.net/";
+    "mongodb+srv://yanivoss4s:9rwmHf3LVabYVUZR@express-testing-api.0tlsc9f.mongodb.net/";
   const client = new MongoClient(durl);
 
   try {
@@ -394,26 +375,8 @@ app.post("/send-email", (req, res) => {
   // Extract the recipient's email and email body from the request
   const text_contact = req.body.contact;
   const email = req.body.email;
-  recipientEmail = "taliabluom@gmail.com";
+  recipientEmail = "tamir.kucherov@braude.ac.il";
 
-  // Create a Nodemailer transporter
-  // const transporter1 = nodemailer.createTransport({
-  //   // Configure your email provider here
-  //   service: "Walla",
-  //   auth: {
-  //     user: "taliaadi1234@walla.co.il",
-  //     pass: "13579Adi!",
-  //   },
-  // });
-  // const transporter = nodemailer.createTransport({
-  //   host: "smtp.walla.co.il",
-  //   port: 587,
-  //   secure: false, // Set to true if using SSL/TLS encrypted connection (port 465)
-  //   auth: {
-  //     user: "taliaadi1234@walla.co.il",
-  //     pass: "13579Adi!",
-  //   },
-  // });
   const transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
     port: 587,
