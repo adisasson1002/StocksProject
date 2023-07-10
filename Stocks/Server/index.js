@@ -375,7 +375,7 @@ app.post("/send-email", (req, res) => {
   // Extract the recipient's email and email body from the request
   const text_contact = req.body.contact;
   const email = req.body.email;
-  recipientEmail = "tamir.kucherov@braude.ac.il";
+  recipientEmail = "tamirkucherov@gmail.com";
 
   const transporter = nodemailer.createTransport({
     host: "smtp.office365.com",
